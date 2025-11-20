@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7, 8월 발주 품목 분석 보고서</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a5276;
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #1a5276;
+        }
+        h2 {
+            font-size: 1.8em;
+        }
+        h3 {
+            font-size: 1.4em;
+            border-bottom: 1px solid #eee;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        .card {
+            background-color: #f9f9f9;
+            border-left: 5px solid #3498db;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #eaf2f8;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .total-row th, .total-row td {
+            background-color: #d6eaf8;
+            font-weight: bold;
+            color: #1a5276;
+        }
+        .chart-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fefefe;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .chart-bar-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .chart-label {
+            width: 120px;
+            min-width: 120px;
+            margin-right: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        .chart-bar {
+            height: 30px;
+            background-color: #3498db;
+            color: #ffffff;
+            text-align: right;
+            line-height: 30px;
+            border-radius: 3px;
+            padding-right: 10px;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: width 0.5s ease-out;
+        }
+        .chart-bar.red {
+            background-color: #e74c3c;
+        }
+        .chart-bar.green {
+            background-color: #2ecc71;
+        }
+        .chart-bar.orange {
+            background-color: #f39c12;
+        }
+        .note {
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-left: 4px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>7, 8월 발주 품목 분석 보고서</h1>
+
+        <div class="note">
+            <p><strong>참고:</strong> 본 보고서의 모든 데이터는 질문에 실제 데이터가 제공되지 않아 분석을 위해 합리적인 가상의 수치를 사용하여 작성되었습니다. 실제 데이터와는 차이가 있을 수 있습니다.</p>
+        </div>
+
+        <div class="card">
+            <h2>종합 요약</h2>
+            <p>7월과 8월의 발주 품목을 분석한 결과, 8월에 전반적인 발주량과 발주 금액이 증가하는 추세를 보였습니다. 특히 전산용품과 비품 카테고리에서 발주 금액이 크게 상승하여 전체 발주액 증가를 견인했습니다. 사무용품과 소모품은 꾸준히 높은 발주량을 유지하며 기본적인 운영에 필수적인 품목임을 나타냈습니다.</p>
+            <p>주요 발주 품목으로는 A4 용지, 토너 카트리지 등이 두 달 연속 상위권을 차지했으며, 8월에는 노트북, 모니터 등 고가 전산 비품의 발주가 눈에 띄게 증가했습니다.</p>
+        </div>
+
+        <h2>1. 월별 발주 현황</h2>
+        <p>아래 표는 7월과 8월의 카테고리별 발주 수량 및 금액 현황입니다.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>카테고리</th>
+                    <th>7월 발주 수량 (단위)</th>
+                    <th>7월 발주 금액 (원)</th>
+                    <th>8월 발주 수량 (단위)</th>
+                    <th>8월 발주 금액 (원)</th>
+                    <th>증감률 (금액)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>사무용품</td>
+                    <td>150</td>
+                    <td>1,500,000</td>
+                    <td>180</td>
+                    <td>1,800,000</td>
+                    <td>+20.0%</td>
+                </tr>
+                <tr>
+                    <td>전산용품</td>
+                    <td>80</td>
+                    <td>3,200,000</td>
+                    <td>95</td>
+                    <td>3,800,000</td>
+                    <td>+18.8%</td>
+                </tr>
+                <tr>
+                    <td>소모품</td>
+                    <td>200</td>
+                    <td>800,000</td>
+                    <td>220</td>
+                    <td>880,000</td>
+                    <td>+10.0%</td>
+                </tr>
+                <tr>
+                    <td>비품</td>
+                    <td>10</td>
+                    <td>2,500,000</td>
+                    <td>12</td>
+                    <td>3,000,000</td>
+                    <td>+20.0%</td>
+                </tr>
+                <tr>
+                    <td>기타</td>
+                    <td>30</td>
+                    <td>500,000</td>
+                    <td>35</td>
+                    <td>550,000</td>
+                    <td>+10.0%</td>
+                </tr>
+                <tr class="total-row">
+                    <th>총계</th>
+                    <td>470</td>
+                    <td>8,500,000</td>
+                    <td>542</td>
+                    <td>10,030,000</td>
+                    <td>+18.0%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="chart-container">
+            <h3>월별 총 발주 금액 비교</h3>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">7월</div>
+                <div class="chart-bar" style="width: 70.83%;">8,500,000원</div>
+            </div>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">8월</div>
+                <div class="chart-bar green" style="width: 83.58%;">10,030,000원</div>
+            </div>
+            <p class="note">* 막대 길이는 최대 발주 금액(가상 12,000,000원) 대비 비율로 표시됩니다.</p>
+        </div>
+
+        <h2>2. 카테고리별 분석</h2>
+        <ul>
+            <li><strong>사무용품:</strong> 7월 150단위(150만원)에서 8월 180단위(180만원)로 수량 및 금액 모두 20% 증가했습니다. 이는 일반적인 사무실 운영에 필요한 품목의 꾸준한 수요를 반영합니다.</li>
+            <li><strong>전산용품:</strong> 7월 80단위(320만원)에서 8월 95단위(380만원)로 18.8% 증가했습니다. 고가 품목이 많은 카테고리 특성상 금액 증가가 전체 발주액에 큰 영향을 미쳤습니다.</li>
+            <li><strong>소모품:</strong> 7월 200단위(80만원)에서 8월 220단위(88만원)로 10% 증가했습니다. 비교적 저가이지만 사용 빈도가 높은 품목들로 구성되어 있습니다.</li>
+            <li><strong>비품:</strong> 7월 10단위(250만원)에서 8월 12단위(300만원)로 20% 증가했습니다. 노트북, 모니터 등 고가 비품의 발주가 8월에 집중된 것으로 보입니다.</li>
+        </ul>
+
+        <div class="chart-container">
+            <h3>8월 카테고리별 발주 금액 (상위 3개)</h3>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">전산용품</div>
+                <div class="chart-bar orange" style="width: 31.67%;">3,800,000원</div>
+            </div>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">비품</div>
+                <div class="chart-bar red" style="width: 25.00%;">3,000,000원</div>
+            </div>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">사무용품</div>
+                <div class="chart-bar" style="width: 15.00%;">1,800,000원</div>
+            </div>
+            <p class="note">* 막대 길이는 최대 발주 금액(가상 12,000,000원) 대비 비율로 표시됩니다.</p>
+        </div>
+
+        <h2>3. 주요 발주 품목 (가상 데이터 기반)</h2>
+        <h3>7월 주요 발주 품목</h3>
+        <ul>
+            <li>A4 용지 (사무용품)</li>
+            <li>토너 카트리지 (소모품)</li>
+            <li>볼펜 세트 (사무용품)</li>
+            <li>무선 마우스 (전산용품)</li>
+            <li>키보드 (전산용품)</li>
+        </ul>
+
+        <h3>8월 주요 발주 품목</h3>
+        <ul>
+            <li>A4 용지 (사무용품)</li>
+            <li>토너 카트리지 (소모품)</li>
+            <li>노트북 (비품)</li>
+            <li>모니터 (비품)</li>
+            <li>USB 메모리 (전산용품)</li>
+        </ul>
+
+        <h2>4. 분석 및 제언</h2>
+        <p>7월 대비 8월의 발주 금액이 약 18% 증가한 것은 긍정적인 성장 또는 활발한 활동을 나타낼 수 있습니다. 특히 전산용품과 비품의 증가는 신규 인력 충원, 장비 교체 주기 도래, 또는 특정 프로젝트 수행을 위한 투자일 가능성이 높습니다. A4 용지, 토너 카트리지와 같은 소모성 품목은 꾸준히 높은 발주량을 보이므로, 정기적인 재고 관리 및 대량 구매를 통한 비용 절감 방안을 모색할 필요가 있습니다.</p>
+        <p>향후 발주 계획 수립 시, 월별/카테고리별 증감 추이를 면밀히 분석하여 예산 배정의 효율성을 높이고, 고가 품목의 발주 시에는 사전 승인 절차를 강화하여 불필요한 지출을 방지하는 것이 중요합니다.</p>
+
+        <div class="note">
+            <p>본 보고서는 가상의 데이터를 기반으로 작성되었으므로, 실제 의사결정에는 실제 데이터를 활용한 추가 분석이 필요합니다.</p>
+        </div>
+    </div>
+</body>
+</html>

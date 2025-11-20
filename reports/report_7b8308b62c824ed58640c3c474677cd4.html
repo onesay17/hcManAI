@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8월 발주 업체별 현황 보고서</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+        }
+        p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .chart-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fdfdfd;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .chart-bar-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .chart-label {
+            width: 120px;
+            flex-shrink: 0;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9em;
+        }
+        .chart-bar {
+            height: 25px;
+            background-color: #3498db;
+            border-radius: 3px;
+            margin-left: 10px;
+            position: relative;
+            transition: width 0.5s ease-out;
+        }
+        .chart-value {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .disclaimer {
+            margin-top: 50px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            color: #856404;
+            font-size: 0.9em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>8월 발주 업체별 현황 보고서</h1>
+        <p>본 보고서는 8월 한 달간의 발주 업체별 현황을 분석한 내용입니다. 데이터는 보고서 요청에 따라 **가상으로 생성된 수치**이며, 실제 데이터와는 무관합니다.</p>
+
+        <h2>1. 업체별 발주 현황 요약</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>업체명</th>
+                    <th>발주 건수</th>
+                    <th>총 발주 금액 (원)</th>
+                    <th>평균 발주 금액 (원)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>(주)행복상사</td>
+                    <td>15</td>
+                    <td>15,000,000</td>
+                    <td>1,000,000</td>
+                </tr>
+                <tr>
+                    <td>(주)미래테크</td>
+                    <td>10</td>
+                    <td>22,000,000</td>
+                    <td>2,200,000</td>
+                </tr>
+                <tr>
+                    <td>(주)성공파트너</td>
+                    <td>8</td>
+                    <td>8,000,000</td>
+                    <td>1,000,000</td>
+                </tr>
+                <tr>
+                    <td>(주)글로벌유통</td>
+                    <td>12</td>
+                    <td>18,000,000</td>
+                    <td>1,500,000</td>
+                </tr>
+                <tr>
+                    <td>(주)혁신솔루션</td>
+                    <td>7</td>
+                    <td>12,000,000</td>
+                    <td>1,714,285</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>2. 총 발주 금액 비교 (막대 차트)</h2>
+        <p>각 업체의 총 발주 금액을 시각적으로 비교한 막대 차트입니다. (최대 발주 금액을 100% 기준으로 표시)</p>
+        <div class="chart-container">
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">(주)행복상사</div>
+                <div class="chart-bar" style="width: 68.18%;"><span class="chart-value">15,000,000원</span></div>
+            </div>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">(주)미래테크</div>
+                <div class="chart-bar" style="width: 100%; background-color: #27ae60;"><span class="chart-value">22,000,000원</span></div>
+            </div>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">(주)성공파트너</div>
+                <div class="chart-bar" style="width: 36.36%;"><span class="chart-value">8,000,000원</span></div>
+            </div>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">(주)글로벌유통</div>
+                <div class="chart-bar" style="width: 81.81%;"><span class="chart-value">18,000,000원</span></div>
+            </div>
+            <div class="chart-bar-wrapper">
+                <div class="chart-label">(주)혁신솔루션</div>
+                <div class="chart-bar" style="width: 54.54%;"><span class="chart-value">12,000,000원</span></div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>참고:</strong> 이 보고서에 사용된 모든 데이터는 질문의 요구사항에 따라 임의로 생성된 가상의 수치입니다. 실제 비즈니스 의사결정에는 사용될 수 없습니다.
+        </div>
+    </div>
+</body>
+</html>
