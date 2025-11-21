@@ -52,6 +52,7 @@ class LLMService:
 2. 스키마에 없는 테이블명(예: Orders, Order, OrderTable 등)을 절대 사용하지 마세요.
 3. 스키마에 없는 컬럼명(예: OrderDate, Order_Date, pkDate 등)을 절대 사용하지 마세요.
 4. 테이블명은 반드시 전체 경로 형식으로 사용하세요: "heechang.heechang.Pkfl" (단순히 "Pkfl"만 사용하면 안 됩니다!)
+   - 단, sffl 테이블은 스키마 경로 없이 "sffl"만 사용하세요.
 5. 컬럼명은 정확히 스키마에 명시된 실제 필드명을 사용하세요:
    - 발주일: Pk_date (pkDate 아님!)
    - 입고예정일: Pk_pdat (pkPdat 아님!)
@@ -59,19 +60,39 @@ class LLMService:
    - 등록일: Pk_bdat (pkBdat 아님!)
    - 기타 모든 필드도 스키마에 명시된 실제 필드명을 정확히 사용하세요.
 6. MS-SQL (T-SQL) 문법을 사용하세요.
-7. 날짜 처리 규칙:
+7. **보안 규칙 (매우 중요):**
+   - WITH 절(CTE, Common Table Expression)을 절대 사용하지 마세요. 보안 검증에서 차단됩니다.
+   - 복잡한 쿼리가 필요한 경우 서브쿼리(Subquery)나 JOIN을 사용하세요.
+   - 예시: WITH 절 대신 서브쿼리 사용
+     - 잘못된 예: 
+       WITH Top10Products AS (SELECT TOP 10 sf_pona, SUM(sf_amtt) AS ProductSales FROM sffl GROUP BY sf_pona ORDER BY ProductSales DESC)
+       SELECT ...
+     - 올바른 예:
+       SELECT 
+         T.sf_pona AS ProductName,
+         T.ProductSales,
+         (T.ProductSales / (SELECT SUM(sf_amtt) FROM sffl WHERE sf_yona = '부산지점' AND sf_msbn = '1')) * 100 AS SalesProportion
+       FROM (
+         SELECT TOP 10 sf_pona, SUM(sf_amtt) AS ProductSales
+         FROM sffl
+         WHERE sf_yona = '부산지점' AND sf_msbn = '1'
+         GROUP BY sf_pona
+         ORDER BY SUM(sf_amtt) DESC
+       ) AS T
+       ORDER BY T.ProductSales DESC
+8. 날짜 처리 규칙:
    - 날짜 필드(Pk_date, Pk_pdat 등)는 YYYYMMDD 형식입니다 (예: 20240815).
    - 사용자가 년도를 명시하지 않으면 현재 년도를 사용하세요: YEAR(GETDATE())
    - 예시: "8월 발주 건수" → SUBSTRING(Pk_date, 1, 4) = CAST(YEAR(GETDATE()) AS VARCHAR(4)) AND SUBSTRING(Pk_date, 5, 2) = '08'
    - 예시: "2024년 8월 발주 건수" → SUBSTRING(Pk_date, 1, 4) = '2024' AND SUBSTRING(Pk_date, 5, 2) = '08'
    - 년도만 명시된 경우: "2024년 발주 건수" → SUBSTRING(Pk_date, 1, 4) = '2024'
    - 월만 명시된 경우: "8월 발주 건수" → 현재 년도 + 해당 월
-8. COUNT 사용 규칙:
+9. COUNT 사용 규칙:
    - 사용자가 명시적으로 "중복 제거", "고유한", "유니크" 등의 표현을 사용하지 않는 한, COUNT(*)를 사용하세요.
    - COUNT(DISTINCT 컬럼명)은 사용자가 명시적으로 요청한 경우에만 사용하세요.
    - 단순히 "건수", "개수", "몇 개"를 물어보는 경우에는 COUNT(*)를 사용하세요.
-9. SQL 쿼리만 반환하세요. 설명, 주석, 마크다운 코드 블록은 포함하지 마세요.
-10. 테이블명과 컬럼명은 대소문자를 구분하여 정확히 사용하세요 (예: Pk_date, Pk_pdat 등).
+10. SQL 쿼리만 반환하세요. 설명, 주석, 마크다운 코드 블록은 포함하지 마세요.
+11. 테이블명과 컬럼명은 대소문자를 구분하여 정확히 사용하세요 (예: Pk_date, Pk_pdat 등).
 
 SQL 쿼리:"""
 
@@ -101,9 +122,42 @@ SQL 쿼리:"""
             data: DB 조회 결과 JSON 문자열
             
         Returns:
-            요약된 응답
+            요약된 응답 (그래프가 필요한 경우 HTML 포함)
         """
-        prompt = f"""다음 질문과 데이터를 바탕으로 자연스럽고 명확한 답변을 작성해주세요.
+        # 그래프가 필요한지 확인 (추이, 그래프, 차트 등의 키워드)
+        needs_graph = any(keyword in query.lower() for keyword in ["추이", "그래프", "차트", "chart", "trend"])
+        
+        if needs_graph:
+            # 그래프 포함 HTML 응답 생성
+            prompt = f"""다음 질문과 데이터를 바탕으로 HTML 형식의 답변을 작성해주세요.
+
+질문: {query}
+
+데이터:
+{data}
+
+요구사항:
+1. 데이터를 바탕으로 질문에 대한 답변을 작성하세요.
+2. 자연스러운 한국어로 답변하세요.
+3. **중요**: 답변은 HTML 형식으로 작성하되, 다음을 포함하세요:
+   - 텍스트 설명
+   - 데이터를 시각화한 HTML/CSS 그래프 (추이 그래프, 막대 그래프, 파이 차트 등 질문에 맞는 형태)
+   - 그래프는 순수 HTML/CSS로 작성 (외부 라이브러리 사용 금지)
+   - 그래프는 <div> 태그와 CSS 스타일을 사용하여 시각적으로 표현
+   - 데이터 값은 실제 데이터를 기반으로 정확하게 표시
+4. 마크다운 형식(**굵게**)을 사용하여 중요한 숫자나 통계를 강조하세요.
+5. HTML 태그는 이스케이프하지 말고 그대로 포함하세요.
+
+답변 형식:
+- HTML 형식으로 작성
+- <div> 태그로 그래프 영역 구분
+- CSS 스타일을 <style> 태그나 inline style로 포함
+- 예시: 막대 그래프는 <div>의 width나 height로 표현, 추이 그래프는 점과 선으로 표현
+
+답변:"""
+        else:
+            # 일반 텍스트 응답
+            prompt = f"""다음 질문과 데이터를 바탕으로 자연스럽고 명확한 답변을 작성해주세요.
 
 질문: {query}
 
@@ -114,7 +168,7 @@ SQL 쿼리:"""
 1. 데이터를 바탕으로 질문에 대한 답변을 작성하세요.
 2. 자연스러운 한국어로 답변하세요.
 3. 불필요한 설명은 생략하고 핵심 내용만 전달하세요.
-4. 숫자나 통계가 있다면 명확히 표시하세요.
+4. 숫자나 통계가 있다면 마크다운 형식(**굵게**)으로 강조하세요.
 
 답변:"""
 
@@ -122,6 +176,12 @@ SQL 쿼리:"""
             messages = [HumanMessage(content=prompt)]
             response = self.model.invoke(messages)
             summary = response.content.strip() if hasattr(response, 'content') else str(response)
+            
+            # 마크다운을 HTML로 변환
+            if needs_graph:
+                summary = self._normalize_text_with_html(summary)
+            else:
+                summary = self._normalize_text_with_html(summary)
         else:
             raise ValueError(f"지원하지 않는 LLM 제공자: {self.provider}")
         
@@ -441,12 +501,75 @@ HTML 규칙:
 </body>
 </html>"""
 
-    def _normalize_html(self, html: str) -> str:
-        """Gemini가 남긴 마크다운 스타일(**bold**)을 HTML 태그로 치환"""
-        if not html:
-            return html
-        # **bold** -> <strong>bold</strong>
+    def _normalize_text_with_html(self, text: str) -> str:
+        """일반 텍스트 응답의 마크다운 스타일(**bold**)을 HTML 태그로 치환"""
+        if not text:
+            return text
+        
+        # 1. 리스트 형식의 제품명과 금액 강조: "1. **제품명**: 금액원" -> "1. <strong>제품명</strong>: <strong>금액원</strong>"
+        def repl_list_item(match):
+            num = match.group(1)  # 숫자.
+            product = match.group(2)  # 제품명
+            amount = match.group(3)  # 금액
+            return f"{num}<strong>{product}</strong>: <strong>{amount}</strong>"
+        
+        # 패턴: 숫자. **제품명**: 금액원 (금액은 숫자와 쉼표, 원 포함)
+        text = re.sub(
+            r"(\d+\.\s+)\*\*(.+?)\*\*:\s+([\d,]+원)",
+            repl_list_item,
+            text,
+            flags=re.MULTILINE
+        )
+        
+        # 2. 리스트 형식의 월별 데이터 강조: "*   **1월:** 32,400.0" -> "*   <strong>1월:</strong> 32,400.0"
+        def repl_month_item(match):
+            month = match.group(1)  # 월
+            value = match.group(2)  # 값
+            return f"*   <strong>{month}:</strong> {value}"
+        
+        # 패턴: *   **월:** 값
+        text = re.sub(
+            r"\*\s+\*\*(\d+월):\*\*\s+([\d,\.]+)",
+            repl_month_item,
+            text,
+            flags=re.MULTILINE
+        )
+        
+        # 3. 일반 **bold** -> <strong>bold</strong>
         def repl(match):
             return f"<strong>{match.group(1)}</strong>"
-        return re.sub(r"\*\*(.+?)\*\*", repl, html, flags=re.DOTALL)
+        text = re.sub(r"\*\*(.+?)\*\*", repl, text, flags=re.DOTALL)
+        
+        # 4. 줄바꿈을 <br>로 변환 (HTML이 아닌 경우)
+        if "<html" not in text.lower() and "<div" not in text.lower():
+            text = text.replace("\n", "<br>")
+        
+        return text
+    
+    def _normalize_html(self, html: str) -> str:
+        """HTML 보고서의 마크다운 스타일(**bold**)을 HTML 태그로 치환"""
+        if not html:
+            return html
+        
+        # 1. 리스트 형식의 제품명과 금액 강조: "1. **제품명**: 금액원" -> "1. <strong>제품명</strong>: <strong>금액원</strong>"
+        def repl_list_item(match):
+            num = match.group(1)  # 숫자.
+            product = match.group(2)  # 제품명
+            amount = match.group(3)  # 금액
+            return f"{num}<strong>{product}</strong>: <strong>{amount}</strong>"
+        
+        # 패턴: 숫자. **제품명**: 금액원 (금액은 숫자와 쉼표, 원 포함)
+        html = re.sub(
+            r"(\d+\.\s+)\*\*(.+?)\*\*:\s+([\d,]+원)",
+            repl_list_item,
+            html,
+            flags=re.MULTILINE
+        )
+        
+        # 2. 일반 **bold** -> <strong>bold</strong>
+        def repl(match):
+            return f"<strong>{match.group(1)}</strong>"
+        html = re.sub(r"\*\*(.+?)\*\*", repl, html, flags=re.DOTALL)
+        
+        return html
 
