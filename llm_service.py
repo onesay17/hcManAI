@@ -48,19 +48,39 @@ class LLMService:
 사용자 질문: {query}
 
 중요 규칙 (반드시 준수):
-1. 위에 제공된 스키마 정보에 있는 테이블명과 컬럼명만 사용하세요.
-2. 스키마에 없는 테이블명(예: Orders, Order, OrderTable 등)을 절대 사용하지 마세요.
-3. 스키마에 없는 컬럼명(예: OrderDate, Order_Date, pkDate 등)을 절대 사용하지 마세요.
-4. 테이블명은 반드시 전체 경로 형식으로 사용하세요: "heechang.heechang.Pkfl" (단순히 "Pkfl"만 사용하면 안 됩니다!)
+1. **테이블 선택 규칙 (매우 중요):**
+   - 질문에 "발주", "발주서", "주문", "주문서", "Pkfl" 등의 키워드가 포함되어 있으면 → **heechang.heechang.Pkfl** 테이블을 사용하세요.
+   - 질문에 "매출", "판매", "실적", "목표", "sffl" 등의 키워드가 포함되어 있으면 → **sffl** 테이블을 사용하세요.
+   - 두 키워드가 모두 있거나 애매한 경우, 질문의 주요 의도를 파악하여 적절한 테이블을 선택하세요.
+   - 예시:
+     * "드림월드 발주 현황" → heechang.heechang.Pkfl (발주 키워드)
+     * "부산지점 매출 현황" → sffl (매출 키워드)
+     * "8월 발주 건수" → heechang.heechang.Pkfl (발주 키워드)
+     * "2024년 매출 실적" → sffl (매출 키워드)
+2. 위에 제공된 스키마 정보에 있는 테이블명과 컬럼명만 사용하세요.
+3. 스키마에 없는 테이블명(예: Orders, Order, OrderTable 등)을 절대 사용하지 마세요.
+4. 스키마에 없는 컬럼명(예: OrderDate, Order_Date, pkDate 등)을 절대 사용하지 마세요.
+5. 테이블명은 반드시 전체 경로 형식으로 사용하세요: "heechang.heechang.Pkfl" (단순히 "Pkfl"만 사용하면 안 됩니다!)
    - 단, sffl 테이블은 스키마 경로 없이 "sffl"만 사용하세요.
-5. 컬럼명은 정확히 스키마에 명시된 실제 필드명을 사용하세요:
-   - 발주일: Pk_date (pkDate 아님!)
-   - 입고예정일: Pk_pdat (pkPdat 아님!)
-   - 실입고일: Pk_ldat (pkLdat 아님!)
-   - 등록일: Pk_bdat (pkBdat 아님!)
+6. 컬럼명은 정확히 스키마에 명시된 실제 필드명을 사용하세요:
+   - **Pkfl 테이블 (발주 관련):**
+     * 발주일: Pk_date (pkDate 아님!)
+     * 입고예정일: Pk_pdat (pkPdat 아님!)
+     * 실입고일: Pk_ldat (pkLdat 아님!)
+     * 등록일: Pk_bdat (pkBdat 아님!)
+     * 거래처명: pk_gona
+     * 제품명: pk_pona
+   - **sffl 테이블 (매출 관련):**
+     * 매출일: sf_date
+     * 지점명: sf_yona
+     * 제품명: sf_pona
+     * 거래처명: sf_gona
+     * 매출금액: sf_amtt (실적), sf_omny (목표)
+     * 매출수량: sf_bqty (실적), sf_oqty (목표)
+     * 실적/목표 구분: sf_msbn ('0'=목표, '1'=실적)
    - 기타 모든 필드도 스키마에 명시된 실제 필드명을 정확히 사용하세요.
-6. MS-SQL (T-SQL) 문법을 사용하세요.
-7. **보안 규칙 (매우 중요):**
+7. MS-SQL (T-SQL) 문법을 사용하세요.
+8. **보안 규칙 (매우 중요):**
    - WITH 절(CTE, Common Table Expression)을 절대 사용하지 마세요. 보안 검증에서 차단됩니다.
    - 복잡한 쿼리가 필요한 경우 서브쿼리(Subquery)나 JOIN을 사용하세요.
    - 예시: WITH 절 대신 서브쿼리 사용
@@ -80,19 +100,26 @@ class LLMService:
          ORDER BY SUM(sf_amtt) DESC
        ) AS T
        ORDER BY T.ProductSales DESC
-8. 날짜 처리 규칙:
-   - 날짜 필드(Pk_date, Pk_pdat 등)는 YYYYMMDD 형식입니다 (예: 20240815).
-   - 사용자가 년도를 명시하지 않으면 현재 년도를 사용하세요: YEAR(GETDATE())
-   - 예시: "8월 발주 건수" → SUBSTRING(Pk_date, 1, 4) = CAST(YEAR(GETDATE()) AS VARCHAR(4)) AND SUBSTRING(Pk_date, 5, 2) = '08'
-   - 예시: "2024년 8월 발주 건수" → SUBSTRING(Pk_date, 1, 4) = '2024' AND SUBSTRING(Pk_date, 5, 2) = '08'
-   - 년도만 명시된 경우: "2024년 발주 건수" → SUBSTRING(Pk_date, 1, 4) = '2024'
+9. 날짜 처리 규칙:
+   - **Pkfl 테이블 (발주):**
+     * 날짜 필드: Pk_date, Pk_pdat, Pk_ldat, Pk_bdat 등은 YYYYMMDD 형식입니다 (예: 20240815).
+     * 사용자가 년도를 명시하지 않으면 현재 년도를 사용하세요: YEAR(GETDATE())
+     * 예시: "8월 발주 건수" → SUBSTRING(Pk_date, 1, 4) = CAST(YEAR(GETDATE()) AS VARCHAR(4)) AND SUBSTRING(Pk_date, 5, 2) = '08'
+     * 예시: "2024년 8월 발주 건수" → SUBSTRING(Pk_date, 1, 4) = '2024' AND SUBSTRING(Pk_date, 5, 2) = '08'
+   - **sffl 테이블 (매출):**
+     * 날짜 필드: sf_date는 YYYYMMDD 형식입니다 (예: 20240815).
+     * 사용자가 년도를 명시하지 않으면 현재 년도를 사용하세요: YEAR(GETDATE())
+     * 예시: "8월 매출 현황" → SUBSTRING(sf_date, 1, 4) = CAST(YEAR(GETDATE()) AS VARCHAR(4)) AND SUBSTRING(sf_date, 5, 2) = '08'
+     * 예시: "2024년 8월 매출 현황" → SUBSTRING(sf_date, 1, 4) = '2024' AND SUBSTRING(sf_date, 5, 2) = '08'
+     * 또는 LIKE 패턴 사용: sf_date LIKE '202408%'
+   - 년도만 명시된 경우: "2024년 발주 건수" → SUBSTRING(Pk_date, 1, 4) = '2024' 또는 sf_date LIKE '2024%'
    - 월만 명시된 경우: "8월 발주 건수" → 현재 년도 + 해당 월
-9. COUNT 사용 규칙:
+10. COUNT 사용 규칙:
    - 사용자가 명시적으로 "중복 제거", "고유한", "유니크" 등의 표현을 사용하지 않는 한, COUNT(*)를 사용하세요.
    - COUNT(DISTINCT 컬럼명)은 사용자가 명시적으로 요청한 경우에만 사용하세요.
    - 단순히 "건수", "개수", "몇 개"를 물어보는 경우에는 COUNT(*)를 사용하세요.
-10. SQL 쿼리만 반환하세요. 설명, 주석, 마크다운 코드 블록은 포함하지 마세요.
-11. 테이블명과 컬럼명은 대소문자를 구분하여 정확히 사용하세요 (예: Pk_date, Pk_pdat 등).
+11. SQL 쿼리만 반환하세요. 설명, 주석, 마크다운 코드 블록은 포함하지 마세요.
+12. 테이블명과 컬럼명은 대소문자를 구분하여 정확히 사용하세요 (예: Pk_date, Pk_pdat, sf_date, sf_yona 등).
 
 SQL 쿼리:"""
 
